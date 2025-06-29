@@ -19,6 +19,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       document.documentElement.classList.add('light');
     }
+
+    // Add optimized transition handling for theme switching
+    const handleThemeChange = () => {
+      // Temporarily disable transitions during theme change
+      document.documentElement.style.setProperty('--theme-transition', 'none');
+      
+      // Re-enable transitions after a brief delay
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.documentElement.style.removeProperty('--theme-transition');
+        }, 50);
+      });
+    };
+
+    // Listen for theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', handleThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleThemeChange);
+    };
   }, []);
 
   return (

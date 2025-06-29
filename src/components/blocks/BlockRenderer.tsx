@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
-import { convertBlocks } from 'wp-block-to-html';
+import { useMemo, useState, useEffect } from 'react';
 import { WordPressBlock, WpBlockToHtmlConfig } from '@/types/wordpress';
 
 interface BlockRendererProps {
@@ -50,13 +49,34 @@ export default function BlockRenderer({
   className = '', 
   config = {} 
 }: BlockRendererProps) {
+  const [convertBlocks, setConvertBlocks] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const mergedConfig = useMemo(() => ({
     ...defaultConfig,
     ...config,
   }), [config]);
 
+  // Dynamic import to avoid SSR issues
+  useEffect(() => {
+    async function loadWpBlockToHtml() {
+      try {
+        const module = await import('wp-block-to-html');
+        setConvertBlocks(() => module.convertBlocks);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to load wp-block-to-html:', err);
+        setError('Failed to load block converter');
+        setIsLoading(false);
+      }
+    }
+
+    loadWpBlockToHtml();
+  }, []);
+
   const renderedHTML = useMemo(() => {
-    if (!blocks || blocks.length === 0) {
+    if (!blocks || blocks.length === 0 || !convertBlocks) {
       return '';
     }
 
@@ -71,11 +91,28 @@ export default function BlockRenderer({
       return convertBlocks(compatibleBlocks, mergedConfig);
     } catch (error) {
       console.error('Error rendering blocks with wp-block-to-html:', error);
-      return `<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-        <p><strong>Error rendering content:</strong> ${error instanceof Error ? error.message : 'Unknown error'}</p>
-      </div>`;
+      setError(`Error rendering content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return '';
     }
-  }, [blocks, mergedConfig]);
+  }, [blocks, mergedConfig, convertBlocks]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={`prose prose-lg max-w-none ${className}`}>
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state - fallback to basic rendering
+  if (error || !convertBlocks) {
+    return <FallbackBlockRenderer blocks={blocks} className={className} />;
+  }
 
   if (!renderedHTML) {
     return (

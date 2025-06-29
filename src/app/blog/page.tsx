@@ -19,24 +19,16 @@ import { PostViewCount } from '@/components/PostViews';
 import { Suspense } from 'react';
 
 interface BlogPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // Function to get featured image URL from post
 function getFeaturedImageUrl(post: WordPressPost): string | null {
-  if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'].length > 0) {
-    const featuredMedia = post._embedded['wp:featuredmedia'][0];
-    if (featuredMedia.media_details && featuredMedia.media_details.sizes) {
-      const sizes = featuredMedia.media_details.sizes;
-      if (sizes.medium_large) {
-        return sizes.medium_large.source_url;
-      } else if (sizes.medium) {
-        return sizes.medium.source_url;
-      } else if (sizes.large) {
-        return sizes.large.source_url;
-      }
-    }
-    return featuredMedia.source_url || null;
+  if (post.featured_media && post._embedded?.['wp:featuredmedia']?.[0]) {
+    const media = post._embedded['wp:featuredmedia'][0];
+    return media.media_details?.sizes?.large?.source_url || 
+           media.media_details?.sizes?.medium_large?.source_url || 
+           media.source_url;
   }
   return null;
 }
@@ -47,7 +39,7 @@ async function getBlogPageData(): Promise<{
   categories: WordPressCategory[];
   tags: WordPressTag[];
 }> {
-  const cacheKey = 'blog_page_data';
+  const cacheKey = 'blog-page-data';
   
   // Try server cache first for fastest TTFB
   const cached = serverCache.get<{
@@ -61,15 +53,15 @@ async function getBlogPageData(): Promise<{
 
   // Parallel fetch for optimal performance
   const [posts, categories, tags] = await Promise.all([
-    getAllPosts(1, 12), // First 12 posts
+    getAllPosts(1, 50),
     getAllCategories(),
     getAllTags()
   ]);
 
   const blogData = { posts, categories, tags };
   
-  // Cache for 3 minutes
-  serverCache.set(cacheKey, blogData, 3 * 60 * 1000);
+  // Cache for 10 minutes
+  serverCache.set(cacheKey, blogData, 10 * 60 * 1000);
   
   return blogData;
 }
@@ -78,24 +70,24 @@ async function getBlogPageData(): Promise<{
 export const dynamic = 'force-dynamic';
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  // Await searchParams before accessing its properties
-  await searchParams;
+  // Properly await searchParams in Next.js 15
+  const resolvedSearchParams = await searchParams;
 
   // Safely normalize searchParams values (string vs string[])
-  const pageRaw = Array.isArray(searchParams.page) ? searchParams.page[0] : searchParams.page;
+  const pageRaw = Array.isArray(resolvedSearchParams.page) ? resolvedSearchParams.page[0] : resolvedSearchParams.page;
   const currentPage = parseInt(pageRaw || '1', 10);
 
-  const categorySlug = Array.isArray(searchParams.category)
-    ? searchParams.category[0]
-    : searchParams.category;
+  const categorySlug = Array.isArray(resolvedSearchParams.category)
+    ? resolvedSearchParams.category[0]
+    : resolvedSearchParams.category;
   
-  const tagSlug = Array.isArray(searchParams.tag)
-    ? searchParams.tag[0]
-    : searchParams.tag;
+  const tagSlug = Array.isArray(resolvedSearchParams.tag)
+    ? resolvedSearchParams.tag[0]
+    : resolvedSearchParams.tag;
   
-  const searchQuery = Array.isArray(searchParams.search)
-    ? searchParams.search[0]
-    : searchParams.search;
+  const searchQuery = Array.isArray(resolvedSearchParams.search)
+    ? resolvedSearchParams.search[0]
+    : resolvedSearchParams.search;
   
   const postsPerPage = 8;
 

@@ -308,36 +308,49 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             )}
           </div>
 
-          {/* Sidebar - 1/3 width */}
+          {/* Sidebar - 1/3 width with Full-Height Scrollable Behavior */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div className="space-y-6 min-h-screen">
+              
               {/* Search Box */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Cari Artikel</h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Cari Artikel
+                </h3>
                 <LiveSearch />
               </div>
 
               {/* Newsletter Signup */}
-              <NewsletterSignup variant="sidebar" />
+              <div className="transform hover:scale-[1.02] transition-transform duration-200">
+                <NewsletterSignup variant="sidebar" />
+              </div>
 
               {/* Categories */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Kategori</h3>
-                <div className="space-y-2">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Kategori
+                </h3>
+                                 <div className="space-y-2">
                   {categories.map(category => (
                     <Link
                       key={category.id}
                       href={`/blog?category=${category.slug}`}
-                      className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`block px-3 py-2 rounded-md text-sm transition-all duration-200 transform hover:translate-x-1 ${
                         selectedCategory?.id === category.id
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-sm'
                       }`}
                     >
                       {category.name}
                       {category.count && (
-                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                          ({category.count})
+                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-full">
+                          {category.count}
                         </span>
                       )}
                     </Link>
@@ -346,17 +359,22 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
 
               {/* Tags */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Tag Populer</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  Tag Populer
+                </h3>
+                                 <div className="flex flex-wrap gap-2">
                   {tags.slice(0, 20).map(tag => (
                     <Link
                       key={tag.id}
                       href={`/blog?tag=${tag.slug}`}
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 transform hover:scale-105 ${
                         selectedTag?.id === tag.id
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 shadow-md'
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm'
                       }`}
                     >
                       {tag.name}
@@ -366,7 +384,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
 
               {/* Popular Posts */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Artikel Populer
+                </h3>
                 <PopularPosts 
                   maxResults={5}
                   layout="vertical"

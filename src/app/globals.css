@@ -4,7 +4,7 @@
 
 /* Theme Transitions */
 :root {
-  --theme-transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+  --theme-transition: background-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), fill 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), stroke 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -18,6 +18,17 @@
 ::before,
 ::after {
   transition: var(--theme-transition);
+}
+
+/* Optimize rendering for theme transitions */
+body {
+  transform: translateZ(0); /* Force GPU acceleration */
+  will-change: background-color, color;
+}
+
+/* Prevent layout shifts during theme changes */
+.theme-transitioning {
+  pointer-events: none;
 }
 
 /* Disable transitions for specific elements where it might cause issues */
@@ -38,7 +49,7 @@ body,
 .dark\\:text-gray-100,
 .border-gray-200,
 .dark\\:border-gray-700 {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 @layer base {
@@ -71,7 +82,7 @@ body,
 
     /* Minion Toggle Variables */
     --sz: 0.75rem;
-    --tr: all 0.5s ease 0s;
+    --tr: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
     --c-on-1: #fed501;
     --c-on-2: #e4bf00;
     --c-off-1: #224056;
@@ -1118,5 +1129,158 @@ body,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Enhanced Scrollable Sidebar Styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.8);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.5);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.8);
+}
+
+/* Scrollbar for category and tag sections with different colors */
+.scrollbar-thumb-gray-200::-webkit-scrollbar-thumb {
+  background: rgba(229, 231, 235, 0.8);
+}
+
+.scrollbar-thumb-gray-200::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 1);
+}
+
+.dark .scrollbar-thumb-gray-700::-webkit-scrollbar-thumb {
+  background: rgba(55, 65, 81, 0.8);
+}
+
+.dark .scrollbar-thumb-gray-700::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 1);
+}
+
+/* Scroll indicator styles */
+.sidebar-scroll-indicator {
+  height: 0%;
+  transition: height 0.3s ease-out;
+}
+
+/* Enhanced hover effects for sidebar cards */
+.sidebar-card-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.sidebar-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .sidebar-card-hover:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth scroll behavior for main blog content */
+.blog-main-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Category link hover animation */
+.category-link-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.category-link-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.category-link-hover:hover::before {
+  left: 100%;
+}
+
+/* Tag hover scale animation */
+.tag-hover-scale {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tag-hover-scale:hover {
+  transform: scale(1.05) translateY(-1px);
+}
+
+/* Sidebar section icons animation */
+.sidebar-icon {
+  transition: transform 0.2s ease;
+}
+
+.sidebar-section:hover .sidebar-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Enhanced focus states for accessibility */
+.sidebar-link:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Loading shimmer for sidebar content */
+@keyframes sidebar-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.sidebar-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+  background-size: 400px 100%;
+  animation: sidebar-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .sidebar-shimmer {
+  background: linear-gradient(90deg, #374151 25%, transparent 37%, #374151 63%);
+}
+
+/* Responsive sidebar adjustments */
+@media (max-width: 1024px) {
+  .sidebar-scroll-indicator {
+    display: none;
   }
 } 

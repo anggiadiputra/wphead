@@ -19,24 +19,16 @@ import { PostViewCount } from '@/components/PostViews';
 import { Suspense } from 'react';
 
 interface BlogPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // Function to get featured image URL from post
 function getFeaturedImageUrl(post: WordPressPost): string | null {
-  if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'].length > 0) {
-    const featuredMedia = post._embedded['wp:featuredmedia'][0];
-    if (featuredMedia.media_details && featuredMedia.media_details.sizes) {
-      const sizes = featuredMedia.media_details.sizes;
-      if (sizes.medium_large) {
-        return sizes.medium_large.source_url;
-      } else if (sizes.medium) {
-        return sizes.medium.source_url;
-      } else if (sizes.large) {
-        return sizes.large.source_url;
-      }
-    }
-    return featuredMedia.source_url || null;
+  if (post.featured_media && post._embedded?.['wp:featuredmedia']?.[0]) {
+    const media = post._embedded['wp:featuredmedia'][0];
+    return media.media_details?.sizes?.large?.source_url || 
+           media.media_details?.sizes?.medium_large?.source_url || 
+           media.source_url;
   }
   return null;
 }
@@ -47,7 +39,7 @@ async function getBlogPageData(): Promise<{
   categories: WordPressCategory[];
   tags: WordPressTag[];
 }> {
-  const cacheKey = 'blog_page_data';
+  const cacheKey = 'blog-page-data';
   
   // Try server cache first for fastest TTFB
   const cached = serverCache.get<{
@@ -61,15 +53,15 @@ async function getBlogPageData(): Promise<{
 
   // Parallel fetch for optimal performance
   const [posts, categories, tags] = await Promise.all([
-    getAllPosts(1, 12), // First 12 posts
+    getAllPosts(1, 50),
     getAllCategories(),
     getAllTags()
   ]);
 
   const blogData = { posts, categories, tags };
   
-  // Cache for 3 minutes
-  serverCache.set(cacheKey, blogData, 3 * 60 * 1000);
+  // Cache for 10 minutes
+  serverCache.set(cacheKey, blogData, 10 * 60 * 1000);
   
   return blogData;
 }
@@ -78,24 +70,24 @@ async function getBlogPageData(): Promise<{
 export const dynamic = 'force-dynamic';
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  // Await searchParams before accessing its properties
-  await searchParams;
+  // Properly await searchParams in Next.js 15
+  const resolvedSearchParams = await searchParams;
 
   // Safely normalize searchParams values (string vs string[])
-  const pageRaw = Array.isArray(searchParams.page) ? searchParams.page[0] : searchParams.page;
+  const pageRaw = Array.isArray(resolvedSearchParams.page) ? resolvedSearchParams.page[0] : resolvedSearchParams.page;
   const currentPage = parseInt(pageRaw || '1', 10);
 
-  const categorySlug = Array.isArray(searchParams.category)
-    ? searchParams.category[0]
-    : searchParams.category;
+  const categorySlug = Array.isArray(resolvedSearchParams.category)
+    ? resolvedSearchParams.category[0]
+    : resolvedSearchParams.category;
   
-  const tagSlug = Array.isArray(searchParams.tag)
-    ? searchParams.tag[0]
-    : searchParams.tag;
+  const tagSlug = Array.isArray(resolvedSearchParams.tag)
+    ? resolvedSearchParams.tag[0]
+    : resolvedSearchParams.tag;
   
-  const searchQuery = Array.isArray(searchParams.search)
-    ? searchParams.search[0]
-    : searchParams.search;
+  const searchQuery = Array.isArray(resolvedSearchParams.search)
+    ? resolvedSearchParams.search[0]
+    : resolvedSearchParams.search;
   
   const postsPerPage = 8;
 
@@ -316,36 +308,49 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             )}
           </div>
 
-          {/* Sidebar - 1/3 width */}
+          {/* Sidebar - 1/3 width with Full-Height Scrollable Behavior */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div className="space-y-6 min-h-screen">
+              
               {/* Search Box */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Cari Artikel</h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Cari Artikel
+                </h3>
                 <LiveSearch />
               </div>
 
               {/* Newsletter Signup */}
-              <NewsletterSignup variant="sidebar" />
+              <div className="transform hover:scale-[1.02] transition-transform duration-200">
+                <NewsletterSignup variant="sidebar" />
+              </div>
 
               {/* Categories */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Kategori</h3>
-                <div className="space-y-2">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Kategori
+                </h3>
+                                 <div className="space-y-2">
                   {categories.map(category => (
                     <Link
                       key={category.id}
                       href={`/blog?category=${category.slug}`}
-                      className={`block px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`block px-3 py-2 rounded-md text-sm transition-all duration-200 transform hover:translate-x-1 ${
                         selectedCategory?.id === category.id
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 hover:shadow-sm'
                       }`}
                     >
                       {category.name}
                       {category.count && (
-                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                          ({category.count})
+                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-full">
+                          {category.count}
                         </span>
                       )}
                     </Link>
@@ -354,17 +359,22 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
 
               {/* Tags */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Tag Populer</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  Tag Populer
+                </h3>
+                                 <div className="flex flex-wrap gap-2">
                   {tags.slice(0, 20).map(tag => (
                     <Link
                       key={tag.id}
                       href={`/blog?tag=${tag.slug}`}
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 transform hover:scale-105 ${
                         selectedTag?.id === tag.id
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 shadow-md'
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm'
                       }`}
                     >
                       {tag.name}
@@ -374,7 +384,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
 
               {/* Popular Posts */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                  <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Artikel Populer
+                </h3>
                 <PopularPosts 
                   maxResults={5}
                   layout="vertical"

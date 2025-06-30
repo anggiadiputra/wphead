@@ -1,9 +1,6 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+alwaysApply: true
 ---
-
 # Unified 10X Developer Framework - Single Mode Solution
 # Unified 10X Developer Framework - Headless WordPress Blog Project
 

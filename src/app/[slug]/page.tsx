@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 import { getPostBySlug, getAllPostSlugs, getAllCategories, getAllTags, getAllPosts } from '@/lib/wordpress-api';
 import { WordPressPost, WordPressCategory, WordPressTag } from '@/types/wordpress';
@@ -19,7 +20,7 @@ import {
 } from '@/lib/schema-generator';
 
 interface BlogPostPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // Generate metadata for SEO
@@ -290,10 +291,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 {featuredImageUrl && (
                   <div className="mb-8">
                     <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-lg">
-                      <img
+                      <Image
                         src={featuredImageUrl}
                         alt={(post.title?.rendered || 'Untitled Post').replace(/<[^>]*>/g, '')}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
+                        priority
                       />
                     </div>
                   </div>
@@ -511,12 +515,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       <article key={featuredPost.id} className="group">
                         <Link href={`/${featuredPost.slug}`} className="block">
                           <div className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <div className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden">
+                            <div className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden relative">
                               {featuredImageUrl ? (
-                                <img
+                                <Image
                                   src={featuredImageUrl}
                                   alt={featuredPost.title.rendered}
-                                  className="w-full h-full object-cover"
+                                  fill
+                                  className="object-cover"
+                                  sizes="64px"
                                 />
                               ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">

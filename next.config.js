@@ -3,27 +3,60 @@ const crypto = require('crypto');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['wp.indexof.id'],
+    domains: [
+      'wp.indexof.id',
+      'www.heyapakabar.com',
+      'heyapakabar.com',
+      'localhost',
+      '127.0.0.1'
+    ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'wp.indexof.id',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
+      {
+        protocol: 'https',
+        hostname: 'www.heyapakabar.com',
+        pathname: '/wp-content/uploads/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'heyapakabar.com',
+        pathname: '/wp-content/uploads/**'
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/wp-content/uploads/**'
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        pathname: '/wp-content/uploads/**'
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wordpress.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wp.com',
+        pathname: '/**'
+      }
     ],
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30
   },
   
-  // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react']
   },
 
-  // Transpile wp-block-to-html for better compatibility
   transpilePackages: ['wp-block-to-html'],
 
-  // Response headers for TTFB optimization
   async headers() {
     return [
       {
@@ -49,7 +82,7 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin'
           }
-        ],
+        ]
       },
       {
         source: '/api/(.*)',
@@ -58,7 +91,7 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400'
           }
-        ],
+        ]
       },
       {
         source: '/_next/static/(.*)',
@@ -67,7 +100,7 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable'
           }
-        ],
+        ]
       },
       {
         source: '/images/(.*)',
@@ -76,54 +109,30 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable'
           }
-        ],
+        ]
       }
     ]
   },
 
-  // Compression and optimization
   compress: true,
   poweredByHeader: false,
   
-  // Output optimization
   output: 'standalone',
   
-  // Temporarily disable custom Webpack optimization to prevent runtime errors under Next.js 15
-  /*
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          chunks: 'all',
-          cacheGroups: {
-            ...config.optimization.splitChunks.cacheGroups,
-            framework: {
-              chunks: 'all',
-              name: 'framework',
-              test: /(?< !node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            lib: {
-              test(module) {
-                return module.size() > 160000 && /node_modules[/\\]/.test(module.identifier());
-              },
-              name(module) {
-                const hash = crypto.createHash('sha1');
-                hash.update(module.identifier());
-                return hash.digest('hex').substring(0, 8);
-              },
-              priority: 30,
-            },
-          },
-        },
-      };
-    }
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'wp-block-to-html': require.resolve('wp-block-to-html')
+    };
+
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false
+    };
 
     return config;
-  },
+  }
 };
 
 module.exports = nextConfig; 

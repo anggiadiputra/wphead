@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface NewsletterSignupProps {
   variant?: 'default' | 'sidebar' | 'footer' | 'modal';
@@ -186,9 +187,9 @@ export default function NewsletterSignup({
         
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
           Dengan berlangganan, Anda setuju dengan{' '}
-          <a href="/privacy" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">
+          <Link href="/privacy" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline">
             kebijakan privasi
-          </a>{' '}
+          </Link>{' '}
           kami. Anda dapat berhenti berlangganan kapan saja.
         </p>
       </form>

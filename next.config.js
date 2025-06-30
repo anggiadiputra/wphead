@@ -14,54 +14,49 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'wp.indexof.id',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
       {
         protocol: 'https',
         hostname: 'www.heyapakabar.com',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
       {
         protocol: 'https',
         hostname: 'heyapakabar.com',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
       {
         protocol: 'http',
         hostname: 'localhost',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
       {
         protocol: 'http',
         hostname: '127.0.0.1',
-        pathname: '/wp-content/uploads/**',
+        pathname: '/wp-content/uploads/**'
       },
-      // Allow any WordPress.com subdomain
       {
         protocol: 'https',
         hostname: '*.wordpress.com',
-        pathname: '/**',
+        pathname: '/**'
       },
-      // Allow common CDN patterns
       {
         protocol: 'https',
         hostname: '*.wp.com',
-        pathname: '/**',
+        pathname: '/**'
       }
     ],
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30
   },
   
-  // Experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react']
   },
 
-  // Transpile wp-block-to-html for better compatibility
   transpilePackages: ['wp-block-to-html'],
 
-  // Response headers for TTFB optimization
   async headers() {
     return [
       {
@@ -87,7 +82,7 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin'
           }
-        ],
+        ]
       },
       {
         source: '/api/(.*)',
@@ -96,7 +91,7 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400'
           }
-        ],
+        ]
       },
       {
         source: '/_next/static/(.*)',
@@ -105,7 +100,7 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable'
           }
-        ],
+        ]
       },
       {
         source: '/images/(.*)',
@@ -114,35 +109,30 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable'
           }
-        ],
+        ]
       }
     ]
   },
 
-  // Compression and optimization
   compress: true,
   poweredByHeader: false,
   
-  // Output optimization
   output: 'standalone',
   
-  // Enhanced webpack configuration for wp-block-to-html compatibility
-  webpack: (config, { dev, isServer }) => {
-    // Ensure wp-block-to-html is resolved correctly
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      'wp-block-to-html': require.resolve('wp-block-to-html'),
+      'wp-block-to-html': require.resolve('wp-block-to-html')
     };
 
-    // Handle potential module resolution issues
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
-      path: false,
+      path: false
     };
 
     return config;
-  },
+  }
 };
 
 module.exports = nextConfig; 

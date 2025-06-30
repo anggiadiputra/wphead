@@ -12,6 +12,7 @@ interface LiveSearchProps {
 interface SearchResult extends WordPressPost {
   highlightedTitle?: string;
   highlightedExcerpt?: string;
+  relevanceScore?: number;
 }
 
 interface SearchSuggestion {
@@ -29,15 +30,22 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Mark client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Load search suggestions and recent searches
   useEffect(() => {
+    if (!isClient) return;
     loadSearchSuggestions();
-  }, []);
+  }, [isClient]);
 
   const loadSearchSuggestions = useCallback(() => {
     try {
@@ -97,8 +105,14 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
   const highlightText = useCallback((text: string, searchTerm: string): string => {
     if (!searchTerm.trim()) return text;
     
-    // Split search term into words for better highlighting
-    const searchWords = searchTerm.trim().split(/\s+/).filter(word => word.length > 0);
+    // Split search term into words and sort by length (longest first)
+    const searchWords = searchTerm
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(word => word.length > 0)
+      .sort((a, b) => b.length - a.length);
+    
     let highlightedText = text;
     
     searchWords.forEach(word => {
@@ -110,7 +124,7 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
   }, []);
 
   const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim() || searchQuery.length < 2) {
+    if (!searchQuery.trim()) {
       setResults([]);
       setIsOpen(false);
       setSearchError(null);
@@ -130,7 +144,7 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
     setSearchError(null);
     
     try {
-      const searchResults = await searchPosts(searchQuery, 1, 8); // Increased to 8 results
+      const searchResults = await searchPosts(searchQuery, 1, 8);
       
       // Check if request was aborted
       if (abortControllerRef.current?.signal.aborted) {
@@ -175,10 +189,20 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
       clearTimeout(debounceRef.current);
     }
 
+    // Show suggestions immediately for empty or single character
+    if (query.length === 0 || (query.length === 1 && suggestions.length > 0)) {
+      setResults([]);
+      setShowSuggestions(true);
+      setIsOpen(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // Perform search for 2 or more characters
     debounceRef.current = setTimeout(() => {
-      if (query.trim().length >= 2) {
+      if (query.trim().length >= 1) {
         performSearch(query.trim());
-      } else if (query.trim().length === 0) {
+      } else {
         setResults([]);
         setIsOpen(false);
         setShowSuggestions(false);
@@ -188,14 +212,14 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
           abortControllerRef.current.abort();
         }
       }
-    }, 200); // Slightly increased for better performance
+    }, 150); // Quick response time
 
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [query, performSearch]);
+  }, [query, performSearch, suggestions.length]);
 
   // Cleanup abort controller on unmount
   useEffect(() => {
@@ -273,22 +297,13 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
     const value = e.target.value;
     setQuery(value);
     setSearchError(null);
-    
-    // Show suggestions when input is focused and empty or very short
-    if (value.length === 0 || (value.length === 1 && suggestions.length > 0)) {
-      setShowSuggestions(true);
-      setIsOpen(true);
-      setResults([]);
-    } else {
-      setShowSuggestions(false);
-    }
   };
 
   const handleInputFocus = () => {
     if (query.length === 0 && suggestions.length > 0) {
       setShowSuggestions(true);
       setIsOpen(true);
-    } else if (query.length >= 2 && (results.length > 0 || searchError)) {
+    } else if (query.length >= 1 && (results.length > 0 || searchError)) {
       setIsOpen(true);
     }
   };
@@ -326,14 +341,14 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
 
   const retrySearch = () => {
     setSearchError(null);
-    if (query.trim().length >= 2) {
+    if (query.trim().length >= 1) {
       performSearch(query.trim());
     }
   };
 
   return (
     <div ref={searchRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="relative">
         <div className="relative">
           <input
             ref={inputRef}
@@ -343,17 +358,14 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
             onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
             placeholder="Cari artikel..."
-            className="w-full px-4 py-3 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
-            autoComplete="off"
-            aria-label="Cari artikel"
-            aria-expanded={isOpen}
-            aria-haspopup="listbox"
-            role="combobox"
+            className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+            data-autocomplete="off"
+            data-lpignore="true"
           />
           
           {/* Loading indicator */}
           {isLoading && (
-            <div className="absolute right-12 top-1/2 transform -translate-y-1/2" aria-label="Sedang mencari...">
+            <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
               <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
             </div>
           )}
@@ -364,8 +376,7 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
               type="button"
               onClick={clearSearch}
               className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              title="Hapus pencarian"
-              aria-label="Hapus pencarian"
+              data-title="Hapus pencarian"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -376,10 +387,8 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
           {/* Search button */}
           <button
             type="submit"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-md transition-colors"
-            disabled={!query.trim()}
-            title="Cari"
-            aria-label="Mulai pencarian"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md transition-colors"
+            data-disabled={!query.trim()}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -389,10 +398,10 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
       </form>
 
       {/* Search Results/Suggestions Dropdown */}
-      {isOpen && (
+      {isClient && isOpen && (
         <div 
           className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
-          role="listbox"
+          data-role="listbox"
           aria-label="Hasil pencarian"
         >
           {searchError ? (
@@ -516,7 +525,7 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
                 </div>
               )}
             </>
-          ) : query.trim().length >= 2 && !isLoading ? (
+          ) : query.trim().length >= 1 && !isLoading ? (
             // No Results
             <div className="p-4 text-center">
               <svg className="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -390,12 +390,46 @@ export async function searchPosts(
   }
 
   try {
-    const results = await getAllPosts(page, perPage, undefined, undefined, query);
+    // Build search parameters
+    const params = new URLSearchParams({
+      search: query.trim(),
+      page: page.toString(),
+      per_page: perPage.toString(),
+      _embed: 'true',
+      orderby: 'relevance', // Sort by relevance for better results
+      search_columns: 'post_title,post_content,post_excerpt', // Search in these columns
+      sentence: '0', // Allow partial word matches
+    });
+
+    const url = `${API_BASE}/posts?${params.toString()}`;
+    
+    const results = await fetchWithCache<WordPressPost[]>(
+      url,
+      cacheKey,
+      2 * 60 * 1000, // 2 minutes cache
+      true
+    );
+
+    // Process and rank results
+    const processedResults = results.map(post => {
+      // Calculate relevance score
+      const titleMatch = post.title.rendered.toLowerCase().includes(query.toLowerCase());
+      const excerptMatch = post.excerpt.rendered.toLowerCase().includes(query.toLowerCase());
+      const contentMatch = post.content.rendered.toLowerCase().includes(query.toLowerCase());
+      
+      const score = (titleMatch ? 3 : 0) + (excerptMatch ? 2 : 0) + (contentMatch ? 1 : 0);
+      
+      return {
+        ...post,
+        blocks: parseContentToBlocks(post.content.rendered),
+        relevanceScore: score
+      };
+    }).sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
     
     // Cache search results
-    cacheManager.cacheSearchResults(query, { page, perPage }, results, 2 * 60 * 1000); // 2 minutes
+    cacheManager.cacheSearchResults(query, { page, perPage }, processedResults, 2 * 60 * 1000);
     
-    return results;
+    return processedResults;
   } catch (error) {
     console.error('Error searching posts:', error);
     return [];

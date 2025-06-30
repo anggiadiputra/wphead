@@ -18,6 +18,7 @@ import {
   generateOrganizationSchema, 
   generateWebPageSchema 
 } from '@/lib/schema-generator';
+import BlogSidebar from '@/components/BlogSidebar';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -450,109 +451,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
           {/* Sidebar - 1/3 width */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
-              {/* Search Box */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Cari Artikel</h3>
-                <LiveSearch />
-              </div>
-
-              {/* Newsletter Signup */}
-              <NewsletterSignup variant="sidebar" />
-
-              {/* Categories */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Kategori</h3>
-                <div className="space-y-2">
-                  {allCategories.map(category => (
-                    <Link
-                      key={category.id}
-                      href={`/blog?category=${category.slug}`}
-                      className={`block px-3 py-2 rounded-md text-sm transition-colors ${
-                        postCategories.some(pc => pc.id === category.id)
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
-                      }`}
-                    >
-                      <span dangerouslySetInnerHTML={{ __html: category.name }} />
-                      {category.count && (
-                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
-                          ({category.count})
-                        </span>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Tag Populer</h3>
-                <div className="flex flex-wrap gap-2">
-                  {allTags.slice(0, 20).map(tag => (
-                    <Link
-                      key={tag.id}
-                      href={`/blog?tag=${tag.slug}`}
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        postTags.some(pt => pt.id === tag.id)
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      <span dangerouslySetInnerHTML={{ __html: tag.name }} />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Featured Articles */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm">
-                <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg">Artikel Populer</h3>
-                <div className="space-y-4">
-                  {sidebarFeaturedPosts.slice(0, 5).map((featuredPost, index) => {
-                    const featuredImageUrl = getFeaturedImageUrl(featuredPost);
-                    return (
-                      <article key={featuredPost.id} className="group">
-                        <Link href={`/${featuredPost.slug}`} className="block">
-                          <div className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <div className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden relative">
-                              {featuredImageUrl ? (
-                                <Image
-                                  src={featuredImageUrl}
-                                  alt={featuredPost.title.rendered}
-                                  fill
-                                  className="object-cover"
-                                  sizes="64px"
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
-                                <span dangerouslySetInnerHTML={{ __html: featuredPost.title.rendered }} />
-                              </h4>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {new Date(featuredPost.date).toLocaleDateString('id-ID', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            <BlogSidebar
+              categories={allCategories}
+              tags={allTags}
+              postCategories={postCategories}
+              postTags={postTags}
+            />
           </div>
         </div>
       </div>

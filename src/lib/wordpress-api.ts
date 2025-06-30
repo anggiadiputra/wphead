@@ -10,7 +10,29 @@ import { env } from '@/config/environment';
 import { cacheManager, browserCache } from './cache-manager';
 import { serverCache } from './server-cache';
 
-const API_BASE = env.wordpress.apiUrl;
+// Use client-side or server-side API URL based on environment
+const API_BASE = typeof window !== 'undefined' 
+  ? env.wordpress.publicApiUrl // Client-side: use NEXT_PUBLIC_WORDPRESS_API_URL
+  : env.wordpress.apiUrl;       // Server-side: use WORDPRESS_API_URL
+
+// Validate API_BASE configuration
+if (!API_BASE || API_BASE.trim() === '') {
+  const isClientSide = typeof window !== 'undefined';
+  const envType = isClientSide ? 'Client-side (browser)' : 'Server-side (Node.js)';
+  const requiredVar = isClientSide ? 'NEXT_PUBLIC_WORDPRESS_API_URL' : 'WORDPRESS_API_URL';
+  
+  const errorMessage = `${requiredVar} tidak terdefinisi! Pastikan .env.local sudah benar dan server sudah di-restart.`;
+  console.error(`[${envType}] ${errorMessage}`);
+  console.error('Current API_BASE:', API_BASE);
+  console.error('Environment variables check:');
+  console.error('- WORDPRESS_API_URL:', process.env.WORDPRESS_API_URL);
+  console.error('- NEXT_PUBLIC_WORDPRESS_API_URL:', process.env.NEXT_PUBLIC_WORDPRESS_API_URL);
+  console.error('- env.wordpress.apiUrl:', env.wordpress.apiUrl);
+  console.error('- env.wordpress.publicApiUrl:', env.wordpress.publicApiUrl);
+  throw new Error(errorMessage);
+}
+
+console.log(`[WordPress API] Initialized with base URL: ${API_BASE} (${typeof window !== 'undefined' ? 'client-side' : 'server-side'})`);
 
 // Error handling class
 class WordPressApiError extends Error {

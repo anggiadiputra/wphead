@@ -1,7 +1,7 @@
 export const env = {
   wordpress: {
-    apiUrl: process.env.WORDPRESS_API_URL || 'https://wp.indexof.id/wp-json/wp/v2',
-    publicApiUrl: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://wp.indexof.id/wp-json/wp/v2',
+    apiUrl: process.env.WORDPRESS_API_URL || '',
+    publicApiUrl: process.env.NEXT_PUBLIC_WORDPRESS_API_URL || '',
   },
   site: {
     url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',

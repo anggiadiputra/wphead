@@ -3,49 +3,27 @@ const crypto = require('crypto');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'wp.indexof.id',
-      'www.heyapakabar.com',
-      'heyapakabar.com',
-      'localhost',
-      '127.0.0.1'
-    ],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'wp.indexof.id',
-        pathname: '/wp-content/uploads/**'
+        hostname: 'www.jasakami.id',
+        pathname: '/wp-content/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'jasakami.id',
+        pathname: '/wp-content/uploads/**',
       },
       {
         protocol: 'https',
         hostname: 'www.heyapakabar.com',
-        pathname: '/wp-content/uploads/**'
+        pathname: '/wp-content/uploads/**',
       },
       {
         protocol: 'https',
         hostname: 'heyapakabar.com',
-        pathname: '/wp-content/uploads/**'
+        pathname: '/wp-content/uploads/**',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        pathname: '/wp-content/uploads/**'
-      },
-      {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-        pathname: '/wp-content/uploads/**'
-      },
-      {
-        protocol: 'https',
-        hostname: '*.wordpress.com',
-        pathname: '/**'
-      },
-      {
-        protocol: 'https',
-        hostname: '*.wp.com',
-        pathname: '/**'
-      }
     ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60 * 60 * 24 * 30

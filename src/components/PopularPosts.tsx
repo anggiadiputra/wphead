@@ -15,6 +15,7 @@ interface PopularPostsProps {
   showImages?: boolean;
   showExcerpt?: boolean;
   showDate?: boolean;
+  posts?: WordPressPost[]; // Pre-fetched posts from server-side
 }
 
 // Calculate reading time
@@ -25,58 +26,7 @@ const calculateReadingTime = (content: string): number => {
 };
 
 // Fallback static data to prevent loading states
-const FALLBACK_POSTS = [
-  { 
-    id: 16, 
-    title: { rendered: 'Savana Bekol dan Pantai Bama - Dua Pesona Utama Taman Nasional Baluran' },
-    slug: 'savana-bekol-dan-pantai-bama-dua-pesona-utama-taman-nasional-baluran',
-    excerpt: { rendered: 'Afrika van Java dengan padang savana luas dan pantai indah...' },
-    date: '2025-06-28T19:24:26',
-    featured_media: 18,
-    _embedded: {
-      'wp:featuredmedia': [{
-        source_url: 'https://wp.indexof.id/wp-content/uploads/2025/06/Desktop-screenshot-06-03-2025_04_52_AM-768x427.png'
-      }]
-    }
-  },
-  { 
-    id: 12, 
-    title: { rendered: 'Eksplorasi Goa Gong - Pesona Alam Bawah Tanah yang Memikat Hati' },
-    slug: 'eksplorasi-goa-gong-pesona-alam-bawah-tanah-yang-memikat-hati',
-    excerpt: { rendered: 'Gua terindah di Asia Tenggara dengan stalaktit berkilau...' },
-    date: '2025-06-28T07:00:23',
-    featured_media: 13,
-    _embedded: {
-      'wp:featuredmedia': [{
-        source_url: 'https://wp.indexof.id/wp-content/uploads/2025/06/cPanel-Tools-06-28-2025_12_45_AM-768x387.png'
-      }]
-    }
-  },
-  { 
-    id: 6, 
-    title: { rendered: 'Wisata Sejarah dan Budaya di Jogja - Destinasi yang Penuh Makna' },
-    slug: 'wisata-sejarah-dan-budaya-di-jogja-destinasi-yang-penuh-makna',
-    excerpt: { rendered: 'Jelajahi keraton, candi megah, dan kampung bersejarah...' },
-    date: '2025-06-28T03:53:07',
-    featured_media: 15,
-    _embedded: {
-      'wp:featuredmedia': [{
-        source_url: 'https://wp.indexof.id/wp-content/uploads/2025/06/carbon-4-768x703.png'
-      }]
-    }
-  },
-  { 
-    id: 1, 
-    title: { rendered: 'Hello World!' },
-    slug: 'hello-world',
-    excerpt: { rendered: 'Welcome to WordPress. This is your first post...' },
-    date: '2025-06-27T15:19:56',
-    featured_media: 0,
-    _embedded: {
-      'wp:featuredmedia': null
-    }
-  }
-];
+const FALLBACK_POSTS: WordPressPost[] = [];
 
 export default function PopularPosts({
   maxResults = 6,
@@ -85,28 +35,42 @@ export default function PopularPosts({
   layout = 'vertical',
   showImages = true,
   showExcerpt = false,
-  showDate = true
+  showDate = true,
+  posts: prefetchedPosts // Renamed for clarity
 }: PopularPostsProps) {
-  const [posts, setPosts] = useState<WordPressPost[]>(FALLBACK_POSTS.slice(0, maxResults) as any);
+  const [posts, setPosts] = useState<WordPressPost[]>(
+    prefetchedPosts?.slice(0, maxResults) || FALLBACK_POSTS.slice(0, maxResults) as any
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
+    // If we already have prefetched posts, don't fetch again
+    if (prefetchedPosts && prefetchedPosts.length > 0) {
+      setPosts(prefetchedPosts.slice(0, maxResults));
+      return;
+    }
+
     // Load real posts in background without blocking UI
     const loadPosts = async () => {
+      setIsLoading(true);
+      
       try {
-        const realPosts = await getAllPosts(maxResults);
+        const realPosts = await getAllPosts(1, maxResults); // Use page 1, maxResults as perPage
+        
         if (realPosts && realPosts.length > 0) {
           setPosts(realPosts);
         }
       } catch (error) {
+        console.error('[PopularPosts] Error loading posts:', error);
         // Keep fallback data on error
-        console.log('Using fallback posts data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadPosts();
-  }, [maxResults]);
+  }, [maxResults, prefetchedPosts]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -328,67 +292,55 @@ export default function PopularPosts({
   // Vertical layout (for sidebar)
   return (
     <div className={className}>
-      {showTrending && (
-        <div className="mb-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Artikel Populer
-          </h3>
-          <div className="flex gap-2 mb-4">
-            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
-              Trending
-            </span>
-            <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-              Popular
-            </span>
-          </div>
-        </div>
-      )}
-      
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <div key={post.id} className="flex gap-3">
-            {showImages && (
-              <div className="w-16 h-16 flex-shrink-0 relative">
-                {getImageUrl(post) ? (
-                  <Image
-                    src={getImageUrl(post)}
-                    alt={post.title?.rendered || 'Article Image'}
-                    fill
-                    className="object-cover rounded-lg"
-                    sizes="64px"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
+      {posts.length === 0 ? (
+        <div className="text-gray-500 text-sm italic p-4">Tidak ada artikel populer yang dapat ditampilkan.</div>
+      ) : (
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <div key={post.id} className="flex gap-3">
+              {showImages && (
+                <div className="w-16 h-16 flex-shrink-0 relative">
+                  {getImageUrl(post) ? (
+                    <Image
+                      src={getImageUrl(post)}
+                      alt={post.title?.rendered || 'Article Image'}
+                      fill
+                      className="object-cover rounded-lg"
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 mb-1">
+                  <Link href={`/${post.slug}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    {post.title?.rendered || 'Untitled Article'}
+                  </Link>
+                </h4>
+                
+                {showDate && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {formatDate(post.date)}
+                  </p>
+                )}
+                
+                {showExcerpt && post.excerpt && (
+                  <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                    {stripHtml(post.excerpt?.rendered || '')}
+                  </p>
                 )}
               </div>
-            )}
-            
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-2 mb-1">
-                <Link href={`/${post.slug}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                  {post.title?.rendered || 'Untitled Article'}
-                </Link>
-              </h4>
-              
-              {showDate && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  {formatDate(post.date)}
-                </p>
-              )}
-              
-              {showExcerpt && post.excerpt && (
-                <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-                  {stripHtml(post.excerpt?.rendered || '')}
-                </p>
-              )}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 } 

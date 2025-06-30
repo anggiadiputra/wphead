@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { searchAPI, SearchFilters, SearchResult } from '@/lib/search-api';
 import { getAllCategories, getAllTags } from '@/lib/wordpress-api';
@@ -402,12 +403,14 @@ export default function SearchResults({ searchParams }: SearchResultsProps) {
                     <div className="p-6">
                       <div className="flex gap-4">
                         {/* Featured Image */}
-                        <div className="w-24 h-24 flex-shrink-0">
+                        <div className="w-24 h-24 flex-shrink-0 relative">
                           {featuredImageUrl ? (
-                            <img
+                            <Image
                               src={featuredImageUrl}
                               alt={post.title.rendered}
-                              className="w-full h-full object-cover rounded-lg"
+                              fill
+                              className="object-cover rounded-lg"
+                              sizes="96px"
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-lg flex items-center justify-center">

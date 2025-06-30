@@ -62,8 +62,8 @@ export default function BlockRenderer({
   useEffect(() => {
     async function loadWpBlockToHtml() {
       try {
-        const module = await import('wp-block-to-html');
-        setConvertBlocks(() => module.convertBlocks);
+        const wpBlockModule = await import('wp-block-to-html');
+        setConvertBlocks(() => wpBlockModule.convertBlocks);
         setIsLoading(false);
       } catch (err) {
         console.error('Failed to load wp-block-to-html:', err);

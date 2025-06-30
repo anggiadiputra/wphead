@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Jasa Migrasi WordPress Profesional | JasaKami.ID',
@@ -278,7 +279,7 @@ export default function WordPressMigrationPage() {
                     </li>
                   ))}
                 </ul>
-                <a 
+                <Link 
                   href="/contact" 
                   className={`
                     inline-flex w-full items-center justify-center rounded-lg px-6 py-3 text-base font-medium shadow transition-all hover:scale-105
@@ -289,7 +290,7 @@ export default function WordPressMigrationPage() {
                   `}
                 >
                   Pilih Paket
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -345,12 +346,12 @@ export default function WordPressMigrationPage() {
               Dapatkan penawaran khusus untuk migrasi multiple website.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
+              <Link 
                 href="/contact" 
                 className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-lg font-medium text-primary-foreground shadow-lg transition-all hover:scale-105 hover:bg-primary/90"
               >
                 Konsultasi Gratis
-              </a>
+              </Link>
               <a 
                 href="https://wa.me/your-number" 
                 target="_blank"

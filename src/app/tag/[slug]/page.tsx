@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Metadata } from 'next';
 import { getPostsByTag, getAllTags, getAllPosts } from '@/lib/wordpress-api';
 import { WordPressPost, WordPressTag } from '@/types/wordpress';
@@ -12,14 +13,16 @@ import {
 } from '@/lib/schema-generator';
 
 interface TagPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  
   try {
     const allTags = await getAllTags();
-    const tag = allTags.find(t => t.slug === params.slug);
+    const tag = allTags.find(t => t.slug === resolvedParams.slug);
 
     if (!tag) {
       return {
@@ -69,6 +72,8 @@ export async function generateStaticParams() {
 }
 
 export default async function TagPage({ params }: TagPageProps) {
+  const resolvedParams = await params;
+  
   let posts: WordPressPost[] = [];
   let tag: WordPressTag | null = null;
   let allTags: WordPressTag[] = [];
@@ -78,7 +83,7 @@ export default async function TagPage({ params }: TagPageProps) {
   try {
     // Fetch all tags first to find the current tag
     allTags = await getAllTags();
-    tag = allTags.find(t => t.slug === params.slug) || null;
+    tag = allTags.find(t => t.slug === resolvedParams.slug) || null;
 
     if (!tag) {
       notFound();
@@ -266,10 +271,12 @@ export default async function TagPage({ params }: TagPageProps) {
                         {/* Featured Image */}
                         <div className="relative h-48 overflow-hidden">
                           {featuredImageUrl ? (
-                            <img
+                            <Image
                               src={featuredImageUrl}
                               alt={post.title.rendered}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
                             />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 flex items-center justify-center">

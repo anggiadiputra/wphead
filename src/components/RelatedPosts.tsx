@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { relatedPostsService, RelatedPost } from '@/lib/related-posts';
 import type { WordPressPost, WordPressCategory, WordPressTag } from '@/types/wordpress';
 
@@ -68,7 +69,7 @@ export default function RelatedPosts({
     };
 
     loadRelatedPosts();
-  }, [currentPost.id, postCategories, postTags, maxResults]);
+  }, [currentPost, postCategories, postTags, maxResults]);
 
   const getFeaturedImageUrl = (post: RelatedPost): string | null => {
     if (post._embedded && post._embedded['wp:featuredmedia'] && post._embedded['wp:featuredmedia'].length > 0) {
@@ -201,10 +202,12 @@ export default function RelatedPosts({
                 {/* Featured Image */}
                 <div className="relative h-48 overflow-hidden">
                   {featuredImageUrl ? (
-                    <img
+                    <Image
                       src={featuredImageUrl}
                       alt={post.title?.rendered || 'Article Image'}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -182,6 +182,7 @@ export default function MobileMenu() {
                                   : 'text-foreground hover:text-primary hover:bg-accent/50'
                                 }
                               `}
+                              onClick={toggleMenu}
                             >
                               {child.label}
                             </Link>
@@ -203,6 +204,7 @@ export default function MobileMenu() {
                           : 'text-gray-900 dark:text-gray-100 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 hover:translate-x-1'
                         }
                       `}
+                      onClick={toggleMenu}
                     >
                       <span className="flex-1">{item.label}</span>
                       {isActive && (
@@ -235,6 +237,17 @@ export default function MobileMenu() {
 export function DesktopNavigation() {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const closeTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to open dropdown with clear
+  const handleMouseEnter = (href: string) => {
+    if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    setOpenDropdown(href);
+  };
+  // Helper to close dropdown with delay
+  const handleMouseLeave = () => {
+    closeTimeout.current = setTimeout(() => setOpenDropdown(null), 180); // 180ms delay
+  };
 
   return (
     <nav className="hidden xl:flex items-center space-x-6 text-sm font-medium">
@@ -248,14 +261,24 @@ export function DesktopNavigation() {
             <div
               key={item.href}
               className="relative"
-              onMouseEnter={() => setOpenDropdown(item.href)}
-              onMouseLeave={() => setOpenDropdown(null)}
+              onMouseEnter={() => handleMouseEnter(item.href)}
+              onMouseLeave={handleMouseLeave}
+              tabIndex={0}
+              onFocus={() => handleMouseEnter(item.href)}
+              onBlur={handleMouseLeave}
             >
               <button
                 className={`
                   inline-flex items-center gap-1 rounded-md px-3 py-2 hover:bg-accent/50
                   ${isActive ? 'text-primary font-semibold' : 'text-foreground hover:text-primary'}
                 `}
+                aria-haspopup="true"
+                aria-expanded={openDropdown === item.href}
+                tabIndex={0}
+                onClick={() => setOpenDropdown(openDropdown === item.href ? null : item.href)}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') setOpenDropdown(null);
+                }}
               >
                 {item.label}
                 <svg 
@@ -280,6 +303,8 @@ export function DesktopNavigation() {
                           : 'text-foreground hover:bg-accent hover:text-accent-foreground'
                         }
                       `}
+                      tabIndex={0}
+                      onClick={() => setOpenDropdown(null)}
                     >
                       {child.label}
                     </Link>

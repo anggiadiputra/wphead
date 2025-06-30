@@ -51,6 +51,26 @@ export default function BlogSidebar({
         <LiveSearch />
       </div>
 
+      {/* Popular Posts - Moved after Search */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+          <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          Artikel Populer
+        </h3>
+        <PopularPosts 
+          maxResults={5}
+          layout="vertical"
+          showImages={true}
+          showExcerpt={false}
+          showDate={true}
+          showTrending={true}
+          posts={popularPosts}
+          className=""
+        />
+      </div>
+
       {/* Newsletter Signup */}
       <div className="transform hover:scale-[1.02] transition-transform duration-200">
         <NewsletterSignup variant="sidebar" />
@@ -65,7 +85,7 @@ export default function BlogSidebar({
           Kategori
         </h3>
         <div className="space-y-2">
-          {categories.map(category => (
+          {categories.slice(0, 10).map(category => (
             <Link
               key={category.id}
               href={`/blog?category=${category.slug}`}
@@ -109,26 +129,6 @@ export default function BlogSidebar({
             </Link>
           ))}
         </div>
-      </div>
-
-      {/* Popular Posts */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
-          <svg className="w-5 h-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-          Artikel Populer
-        </h3>
-        <PopularPosts 
-          maxResults={5}
-          layout="vertical"
-          showImages={true}
-          showExcerpt={false}
-          showDate={true}
-          showTrending={true}
-          posts={popularPosts}
-          className=""
-        />
       </div>
     </div>
   );

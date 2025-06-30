@@ -20,6 +20,9 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
 
+  // Transpile wp-block-to-html for better compatibility
+  transpilePackages: ['wp-block-to-html'],
+
   // Response headers for TTFB optimization
   async headers() {
     return [
@@ -121,7 +124,6 @@ const nextConfig = {
 
     return config;
   },
-  */
 };
 
 module.exports = nextConfig; 

@@ -2,7 +2,8 @@
 .toggle {
 	/* Component variables */
 	--sz: 1rem;
-	--tr: all 0.5s ease 0s;
+	--tr: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+	--tr-fast: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 	--c-light-1: #fed501;
 	--c-light-2: #e4bf00;
 	--c-dark-1: #224056;
@@ -63,7 +64,7 @@
 	z-index: 1;
 	overflow: hidden;
 	box-shadow: 0 0 0 calc(var(--sz) / 8) var(--c-wht-1) inset;
-	animation: goBack 1s ease 0s 1;
+	animation: goBack 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0s 1;
 }
 
 @keyframes goBack {
@@ -87,8 +88,8 @@
 	border-radius: 100%;
 	left: calc(var(--sz) / 3);
 	top: calc(var(--sz) / 1.25); 
-	transition: var(--tr);
-	animation: eye 1s ease 0s;
+	transition: var(--tr-fast);
+	animation: eye 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0s;
 }
 
 @keyframes eye {
@@ -117,8 +118,8 @@
 	background: linear-gradient(188deg, var(--c-wht-1) 0 calc(var(--sz) * 1.25), #fff0 calc((var(--sz) * 1.25) + 1px) 100%);
 	background-size: 100% 200%;
 	background-position: 50% 0%;
-	transition: var(--tr);
-	animation: eyelid 1s ease 0s;
+	transition: var(--tr-fast);
+	animation: eyelid 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0s;
 }
 
 @keyframes eyelid {

@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import SearchResults from './SearchResults';
 
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     categories?: string;
     tags?: string;
@@ -11,11 +11,12 @@ interface SearchPageProps {
     dateTo?: string;
     orderBy?: 'relevance' | 'date' | 'title';
     page?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const query = searchParams.search || '';
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams.search || '';
   
   return {
     title: query ? `Hasil Pencarian: "${query}" | Blog` : 'Pencarian | Blog',
@@ -36,7 +37,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   };
 }
 
-export default function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const resolvedSearchParams = await searchParams;
+  
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
@@ -44,11 +47,11 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
         <div className="mb-8">
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              {searchParams.search ? 'Hasil Pencarian' : 'Pencarian Artikel'}
+              {resolvedSearchParams.search ? 'Hasil Pencarian' : 'Pencarian Artikel'}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              {searchParams.search 
-                ? `Menampilkan hasil pencarian untuk "${searchParams.search}"`
+              {resolvedSearchParams.search 
+                ? `Menampilkan hasil pencarian untuk "${resolvedSearchParams.search}"`
                 : 'Gunakan pencarian canggih untuk menemukan artikel yang Anda cari'
               }
             </p>
@@ -57,7 +60,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
 
         {/* Search Results Component */}
         <Suspense fallback={<SearchResultsSkeleton />}>
-          <SearchResults searchParams={searchParams} />
+          <SearchResults searchParams={resolvedSearchParams} />
         </Suspense>
       </div>
     </div>

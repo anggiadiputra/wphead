@@ -88,20 +88,39 @@ const nextConfig = {
   // Output optimization
   output: 'standalone',
   
-  // Enhanced webpack configuration for wp-block-to-html compatibility
+  // Temporarily disable custom Webpack optimization to prevent runtime errors under Next.js 15
+  /*
   webpack: (config, { dev, isServer }) => {
-    // Ensure wp-block-to-html is resolved correctly
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'wp-block-to-html': require.resolve('wp-block-to-html'),
-    };
-
-    // Handle potential module resolution issues
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      path: false,
-    };
+    if (!dev && isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          chunks: 'all',
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?< !node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            lib: {
+              test(module) {
+                return module.size() > 160000 && /node_modules[/\\]/.test(module.identifier());
+              },
+              name(module) {
+                const hash = crypto.createHash('sha1');
+                hash.update(module.identifier());
+                return hash.digest('hex').substring(0, 8);
+              },
+              priority: 30,
+            },
+          },
+        },
+      };
+    }
 
     return config;
   },

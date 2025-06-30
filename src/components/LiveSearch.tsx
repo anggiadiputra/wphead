@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { searchPosts } from '@/lib/wordpress-api';
 import { WordPressPost } from '@/types/wordpress';
@@ -22,33 +22,14 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        performSearch(query.trim());
-      } else {
-        setResults([]);
-        setIsOpen(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [query]);
-
-  // Close search results when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+  const highlightText = useCallback((text: string, searchTerm: string): string => {
+    if (!searchTerm.trim()) return text;
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900 px-1 rounded">$1</mark>');
   }, []);
 
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     setIsLoading(true);
     try {
       const searchResults = await searchPosts(searchQuery, 1, 5);
@@ -69,14 +50,35 @@ export default function LiveSearch({ className = '' }: LiveSearchProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [highlightText]);
 
-  const highlightText = (text: string, searchTerm: string): string => {
-    if (!searchTerm.trim()) return text;
-    
-    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900 px-1 rounded">$1</mark>');
-  };
+  // Debounce search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (query.trim().length >= 2) {
+        performSearch(query.trim());
+      } else {
+        setResults([]);
+        setIsOpen(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query, performSearch]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);

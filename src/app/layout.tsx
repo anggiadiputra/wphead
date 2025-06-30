@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Source_Sans_3 } from 'next/font/google';
 import Script from 'next/script';
+import Link from 'next/link';
 import './globals.css';
 import MobileMenu, { DesktopNavigation } from '@/components/navigation/MobileMenu';
 import { ThemeProvider } from '@/components/ThemeProvider';
@@ -96,7 +97,7 @@ export default function RootLayout({
             <div className="container mx-auto flex h-14 sm:h-16 lg:h-18 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
               {/* Logo - Left side */}
               <div className="flex items-center">
-                <a href="/" className="flex items-center space-x-2">
+                <Link href="/" className="flex items-center space-x-2">
                   <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-primary rounded-md">
                     <span className="text-primary-foreground font-bold text-xs sm:text-sm lg:text-base">WP</span>
                   </div>
@@ -104,7 +105,7 @@ export default function RootLayout({
                     <span className="hidden sm:inline">WP Blog</span>
                     <span className="sm:hidden">Blog</span>
                   </span>
-                </a>
+                </Link>
               </div>
 
               {/* Right side - Desktop Navigation, Theme Toggle and Mobile Menu */}
@@ -225,34 +226,34 @@ export default function RootLayout({
                   <h3 className="text-lg font-semibold text-foreground">Layanan Kami</h3>
                   <ul className="space-y-2">
                     <li>
-                      <a href="/jasa-migrasi-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/jasa-migrasi-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Jasa Migrasi WordPress
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/jasa-remove-malware" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/jasa-remove-malware" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Jasa Remove Malware
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/jasa-setup-vps" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/jasa-setup-vps" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Jasa Setup VPS
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/jasa-manage-vps" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/jasa-manage-vps" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Jasa Manage VPS
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/maintenance-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/maintenance-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Maintenance WordPress
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/optimasi-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Link href="/optimasi-wordpress" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                         Optimasi WordPress
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>
@@ -262,68 +263,68 @@ export default function RootLayout({
                   <h3 className="text-lg font-semibold text-foreground">Link Cepat</h3>
                   <ul className="space-y-2">
                     <li>
-                      <a href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Blog & Artikel
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/tentang-kami" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/tentang-kami" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Tentang Kami
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/portofolio" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/portofolio" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Portofolio
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/testimoni" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/testimoni" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Testimoni
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/kontak" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/kontak" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Hubungi Kami
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         FAQ
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Privacy Policy
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
+                      <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center">
                         <svg className="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                         Terms of Service
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>

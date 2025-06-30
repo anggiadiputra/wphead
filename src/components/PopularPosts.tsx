@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getAllPosts } from '@/lib/wordpress-api';
 import type { WordPressPost } from '@/types/wordpress';
 import { PostViewCount } from './PostViews';
@@ -171,10 +172,13 @@ export default function PopularPosts({
                 }`}>
                   {getImageUrl(post) ? (
                     <>
-                      <img
+                      <Image
                         src={getImageUrl(post)}
                         alt={post.title?.rendered || 'Article Image'}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        fill
+                        className="object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        sizes={isFeatured ? "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px" : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"}
+                        priority={index < 2}
                       />
                       <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-70'}`} />
                       
@@ -344,12 +348,14 @@ export default function PopularPosts({
         {posts.map((post) => (
           <div key={post.id} className="flex gap-3">
             {showImages && (
-              <div className="w-16 h-16 flex-shrink-0">
+              <div className="w-16 h-16 flex-shrink-0 relative">
                 {getImageUrl(post) ? (
-                  <img
+                  <Image
                     src={getImageUrl(post)}
                     alt={post.title?.rendered || 'Article Image'}
-                    className="w-full h-full object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
+                    sizes="64px"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">

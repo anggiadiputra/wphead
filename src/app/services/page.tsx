@@ -117,12 +117,12 @@ export default function ServicesPage() {
           Dapatkan solusi terbaik sesuai kebutuhan Anda.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
+          <Link 
             href="/contact" 
             className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-lg font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
           >
             Konsultasi Gratis
-          </a>
+          </Link>
           <a 
             href="https://wa.me/your-number" 
             target="_blank"

@@ -10,6 +10,7 @@ import {
 } from '@/lib/wordpress-api';
 import { WordPressPost, WordPressCategory, WordPressTag } from '@/types/wordpress';
 import Link from 'next/link';
+import Image from 'next/image';
 import { serverCache } from '@/lib/server-cache';
 import { SinglePostSkeleton } from '@/components/BlogPostSkeleton';
 import PopularPosts from '@/components/PopularPosts';
@@ -222,11 +223,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                           <div className="md:w-80 flex-shrink-0 p-4">
                             <div className="aspect-video md:aspect-[4/3] md:h-48 relative overflow-hidden rounded-lg">
                               {featuredImageUrl ? (
-                                <img
+                                <Image
                                   src={featuredImageUrl}
                                   alt={post.title?.rendered || 'Article Image'}
-                                  className="w-full h-full object-cover"
-                                  loading={index < 4 ? "eager" : "lazy"}
+                                  fill
+                                  className="object-cover"
+                                  priority={index < 4}
+                                  sizes="(max-width: 768px) 100vw, 320px"
                                 />
                               ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">

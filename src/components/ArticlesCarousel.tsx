@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { WordPressPost } from '@/types/wordpress';
 
 interface ArticlesCarouselProps {
@@ -248,10 +249,12 @@ export default function ArticlesCarousel({ posts }: ArticlesCarouselProps) {
                       {/* Enhanced Featured Image */}
                       <div className="relative h-56 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center overflow-hidden">
                         {featuredImageUrl ? (
-                          <img
+                          <Image
                             src={featuredImageUrl}
                             alt={post.title?.rendered || 'Article Image'}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             onError={(e) => {
                               // If image fails to load, show placeholder
                               e.currentTarget.style.display = 'none';

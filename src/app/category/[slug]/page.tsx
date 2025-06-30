@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getCategoryBySlug, getPostsByCategory, getAllPosts } from '@/lib/wordpress-api';
 import { WordPressPost, WordPressCategory } from '@/types/wordpress';
 import LiveSearch from '@/components/LiveSearch';
 
 interface CategoryPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // Function to get featured image URL from post
@@ -28,11 +29,13 @@ function getFeaturedImageUrl(post: WordPressPost): string | null {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
+  const resolvedParams = await params;
+  
   try {
     // Get category details and posts in parallel
     const [category, posts, featuredPosts] = await Promise.all([
-      getCategoryBySlug(params.slug),
-      getCategoryBySlug(params.slug).then(cat => cat ? getPostsByCategory(cat.id) : []),
+      getCategoryBySlug(resolvedParams.slug),
+      getCategoryBySlug(resolvedParams.slug).then(cat => cat ? getPostsByCategory(cat.id) : []),
       getAllPosts(1, 6) // Get featured posts for sidebar
     ]);
     
@@ -136,10 +139,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                             <div className="md:w-80 flex-shrink-0 p-4">
                               <div className="aspect-video md:aspect-[4/3] md:h-48 relative overflow-hidden rounded-lg">
                                 {featuredImageUrl ? (
-                                  <img
+                                  <Image
                                     src={featuredImageUrl}
                                     alt={post.title.rendered}
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 320px"
                                   />
                                 ) : (
                                   <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
@@ -205,12 +210,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                           <article key={featuredPost.id} className="group">
                             <Link href={`/${featuredPost.slug}`} className="block">
                               <div className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                <div className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden">
+                                <div className="w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden relative">
                                   {featuredImageUrl ? (
-                                    <img
+                                    <Image
                                       src={featuredImageUrl}
                                       alt={featuredPost.title.rendered}
-                                      className="w-full h-full object-cover"
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
                                     />
                                   ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">

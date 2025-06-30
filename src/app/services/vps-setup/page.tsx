@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Jasa Setup VPS WordPress | JasaKami.ID',
@@ -173,12 +174,12 @@ export default function VpsSetupPage() {
           Konsultasikan kebutuhan server Anda dengan tim ahli kami.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
+          <Link 
             href="/contact" 
             className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-lg font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
           >
             Konsultasi Gratis
-          </a>
+          </Link>
           <a 
             href="https://wa.me/your-number" 
             target="_blank"
